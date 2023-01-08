@@ -10,7 +10,7 @@ typedef struct wav_t wav_t;
 typedef struct wav_header_t wav_header_t;
 
 struct wav_header_t {
-    char id[4];
+    char id[4]; /* RIFF */
     unsigned int chunk_size;
     char format[4];
     char subchunk1_id[4];
@@ -34,7 +34,8 @@ struct wav_t {
 WAV_API void wav_read_header(const char* filename, wav_header_t* out);
 
 WAV_API int wav_load_file(const char* filename, wav_t* out);
-WAV_API void wav_write_file(const char* filename, wav_t* wav);
+WAV_API int wav_write_file(const char* filename, wav_t* wav);
+WAV_API void wav_free(wav_t* wav);
 
 #endif /* _WAV_H_ */
 
@@ -60,6 +61,12 @@ int wav_load_file(const char* filename, wav_t* out) {
     fclose(fp);
 
     return 0;
+}
+
+void wav_free(wav_t* wav) {
+    if (!wav) return;
+    if (wav->data) free(wav->data);
+    wav->data = NULL;
 }
 
 #endif /* WAV_IMPLEMENTATION */

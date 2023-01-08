@@ -44,9 +44,9 @@ struct bitmap_t {
 BMP_API void bitmap_read_headers(const char* filename, bitmap_file_header_t* file_header, bitmap_info_header_t* info_header);
 
 BMP_API int bitmap_load_file(const char* filename, bitmap_t* out);
-BMP_API void bitmap_write_file(const char* filename, bitmap_t* bmp);
+BMP_API int bitmap_write_file(const char* filename, bitmap_t* bmp);
 
-BMP_API void bitmap_free_pixels(bitmap_t* bmp);
+BMP_API void bitmap_free(bitmap_t* bmp);
 
 #endif /* _BITMAP_H_ */
 
@@ -140,12 +140,11 @@ int bitmap_load_file(const char* filename, bitmap_t* out) {
 }
 
 /*
- * a função de escrita é bem tranquila, como o cabeçalho já está praticamente
- * num formato legível pra gente, é bem tranquilo,
+ * a função de escrita é bem tranquila já que o cabeçalho já está num formato legível
  * a única coisa que precisa ser feita é reverter os processos que foram feitos
  * na função de load (voltar as paletas pra BGR e escrever os pixels da imagem de baixo pra cima)
  */
-void bitmap_write_file(const char* filename, bitmap_t* bmp) {
+int bitmap_write_file(const char* filename, bitmap_t* bmp) {
     if (!filename || !bmp) return;
     FILE *fp;
     fp = fopen(filename, "wb");
@@ -178,6 +177,14 @@ void bitmap_write_file(const char* filename, bitmap_t* bmp) {
     int pitch = width * sz;
     for (int y = 0; y < height; y++) fwrite(bmp->pixels + (height-1-y)*pitch, 1, pitch, fp);
     fclose(fp);
+}
+
+void bitmap_free(bitmap_t* bmp) {
+    if (!bmp) return;
+    if (bmp->palette) free(bmp->palette);
+    if (bmp->pixels) free(bmp->pixels);
+    bmp->palette = NULL;
+    bmp->pixels = NULL;
 }
 
 #endif /* BITMAP_IMPLEMENTATION */
