@@ -26,54 +26,13 @@ int main(int argc, char** argv) {
     int width, height;
     width = bmp.info_header.width;
     height = bmp.info_header.height;
-    float sz = (float)bmp.info_header.bits_per_pixel / 8.f;
 
-    int pitch = height * sz;
-    // char *buffer = malloc(width * pitch);
-    // memcpy(buffer, bmp.pixels, width * pitch);
-    // for (int y = 0; y < height; y++) {
-    //     memcpy(bmp.pixels + (y * pitch), buffer + ((height-y-1) * pitch), pitch);
-    // }
     SDL_Texture* tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, width, height);
     switch (bmp.info_header.bits_per_pixel) {
         case 4: create_texture4(tex, &bmp); break;
         case 8: create_texture8(tex, &bmp); break;
         case 24: create_texture24(tex, &bmp); break;
     }
-    #if 0
-    SDL_Texture* tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, width, height);
-    void* data;
-    SDL_LockTexture(tex, NULL, &data, &pitch);
-    int size = width * height;
-    Uint32* pixels = data;
-    for (int i = 0; i < size; i += 2) {
-        unsigned char c = bmp.pixels[i/2];
-        int p = (c & 0xF0) >> 4;
-        pixels[i] = bmp.palette[p] | 0xFF000000;
-        p = c & 0xF;
-        pixels[i+1] = bmp.palette[p] | 0xFF000000;
-        // pixels[i] = 0xFF0000FF;
-        // pixels[i+1] = 0xFF00FF00;
-    }
-    SDL_UnlockTexture(tex);
-    #elseif 0
-    SDL_Surface* surf = SDL_CreateRGBSurfaceFrom(bmp.pixels, width, height, bmp.info_header.bits_per_pixel, pitch, 0, 0, 0, 0);
-    // free(buffer);
-    
-    SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
-    printf("testando\n");
-    SDL_FreeSurface(surf);
-    #endif
-    #if 0
-    Uint32* pixels = data;
-    for (int i = 0; i < size; i++) {
-        pixels[i] = 0xff000000;
-        int index = i*3;
-        // Uint32 c = *((Uint32*)(bmp.pixels + index)) >> 8;
-        pixels[i] = 0xff000000 | (bmp.pixels[index] << 16) | (bmp.pixels[index+1] << 8) | bmp.pixels[index+2];
-        // pixels[i] = 0xff000000 | c;
-    }
-    #endif
 
     SDL_Rect dest = { 0, 0, width*2, height*2 };
 
@@ -86,7 +45,6 @@ int main(int argc, char** argv) {
         SDL_RenderPresent(renderer);
     }
 
-    bitmap_write_file("bora.bmp", &bmp);
     free(bmp.pixels);
     if (bmp.palette) free(bmp.palette);
     printf("saindo do loop\n");

@@ -1,9 +1,6 @@
 #ifndef _BITMAP_H_
 #define _BITMAP_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #define BMP_API
 
 typedef struct bitmap_t bitmap_t;
@@ -145,12 +142,12 @@ int bitmap_load_file(const char* filename, bitmap_t* out) {
  * na função de load (voltar as paletas pra BGR e escrever os pixels da imagem de baixo pra cima)
  */
 int bitmap_write_file(const char* filename, bitmap_t* bmp) {
-    if (!filename || !bmp) return;
+    if (!filename || !bmp) return -1;
     FILE *fp;
     fp = fopen(filename, "wb");
     if (!fp) {
         fprintf(stderr, "failed to open file for write: %s\n", filename);
-        return;
+        return -1;
     }
     int width = bmp->info_header.width;
     int height = bmp->info_header.height;
@@ -164,7 +161,7 @@ int bitmap_write_file(const char* filename, bitmap_t* bmp) {
         int colors = (bmp->file_header.offset - 54) / sizeof(Uint32);
         for (int i = 0; i < colors; i++) {
             Uint32 c = bmp->palette[i];
-            Uint8* cc = &c;
+            Uint8* cc = (Uint8*)&c;
             Sint8 aux = cc[0];
             cc[0] = cc[2];
             cc[2] = aux;
@@ -177,6 +174,7 @@ int bitmap_write_file(const char* filename, bitmap_t* bmp) {
     int pitch = width * sz;
     for (int y = 0; y < height; y++) fwrite(bmp->pixels + (height-1-y)*pitch, 1, pitch, fp);
     fclose(fp);
+    return 0;
 }
 
 void bitmap_free(bitmap_t* bmp) {
