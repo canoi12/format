@@ -25,8 +25,7 @@ int main(int argc, char** argv) {
 
     while (SDL_GetQueuedAudioSize(dev) > 0) SDL_Delay(100);
 
-    free(wav.data);
-
+    wav_free(&wav);
     SDL_CloseAudioDevice(dev);
     SDL_Quit();
 
