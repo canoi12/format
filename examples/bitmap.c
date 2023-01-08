@@ -108,8 +108,8 @@ int create_texture24(SDL_Texture* tex, bitmap_t* bmp) {
     int size = width * height;
     for (int i = 0; i < size; i++) {
         Uint8* c = bmp->pixels + (i*3);
-        int ii = i*3;
-        pixels[i] = 0xFF000000 | c[ii] | (c[ii+1] << 8) | (c[ii+2] << 16);
+        Uint32 cc = 0xFF000000 | (c[0] << 16) | (c[1] << 8) | c[2];
+        pixels[i] = cc;
     }
     SDL_UnlockTexture(tex);
     return 0;
