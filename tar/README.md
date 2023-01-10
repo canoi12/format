@@ -14,7 +14,7 @@ A estrutura é mais ou menos assim:
 |   conteúdo      | 512 bytes |
 |     ...         |    ...    |
 
-
+Fora isso, ainda são adicionados mais dois blocos de 512 bytes vazios (ou seja, preenchidos com 0x0) ao final do arquivo.
 
 O cabeçalho segue o padrão posix, alguns dos valores guardados nele são uma strings que representam um valor em octal, então pra utilizar é necessário converter essas strings pra de fato um número octal e aí sim converter para decimal:
 

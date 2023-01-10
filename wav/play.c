@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdint.h>
 
+#include <SDL2/SDL.h>
+
 typedef struct {
     int8_t id[4];
     uint32_t chunk_size;
@@ -32,19 +34,54 @@ static void save_wav(const char* filename, wav_t* wav);
 
 static void free_wav(wav_t* wav);
 
+static void play_wav(wav_t* wav);
+
 int main(int argc, char** argv) {
     if (argc < 2) {
-        fprintf(stdout, "Usage: ./wav [music.wav]\n");
-        return 0;
+        fprintf(stdout, "Usage: ./play [music.wav]\n");
+        return -1;
     }
-    FILE* fp;
-    if (!(fp = fopen(argv[1], "rb"))) {
+    FILE* fp = fopen(argv[1], "rb");
+    if (!fp) {
         fprintf(stderr, "cannot open %s\n", argv[1]);
-        return 0;
+        return -1;
     }
     wav_t wav = load_wav(fp);
     fclose(fp);
+    if (!wav.data) {
+        fprintf(stderr, "failed to read wav\n");
+        return -1;
+    }
+    if (SDL_Init(SDL_INIT_AUDIO)) {
+        fprintf(stderr, "failed to init SDL2: %s\n", SDL_GetError());
+        free_wav(&wav);
+        return -1;
+    }
+    SDL_AudioSpec spec;
+    spec.freq = wav.header.sample_rate;
+    spec.format = AUDIO_S16SYS;
+    spec.channels = wav.header.channels;
+    spec.samples = 4096;
+    spec.callback = NULL;
+
+    SDL_AudioDeviceID dev = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+    if (!dev) {
+        fprintf(stderr, "failed to init audio device: %s\n", SDL_GetError());
+        fclose(fp);
+        free_wav(&wav);
+        return -1;
+    }
+    SDL_PauseAudioDevice(dev, 0);
+
+    SDL_QueueAudio(dev, wav.data, wav.data_size);
+
+    while (SDL_GetQueuedAudioSize(dev) > 0) SDL_Delay(100);
+    printf("exiting\n");
+
     free_wav(&wav);
+
+    SDL_CloseAudioDevice(dev);
+    SDL_Quit();
     return 0;
 }
 

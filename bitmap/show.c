@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <SDL2/SDL.h>
+
 typedef struct {
     unsigned short type;
     unsigned int size;
@@ -43,21 +45,53 @@ static void free_bitmap(bitmap_t* bmp);
 int main(int argc, char** argv) {
     if (argc < 2) {
         fprintf(stdout, "Usage: ./bitmap [img.bmp]\n");
-        return 0;
+        return -1;
     }
     FILE* fp;
     if (!(fp = fopen(argv[1], "rb"))) {
         fprintf(stderr, "Cannot open %s\n", argv[1]);
-        return 0;
+        return -1;
     }
     bitmap_t bmp = load_bitmap(fp);
     fclose(fp);
+    if (!bmp.pixels) {
+        fprintf(stderr, "Failed to load image\n");
+        return -1;
+    }
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Window* window = SDL_CreateWindow("bitmap", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 380, SDL_WINDOW_SHOWN);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Event event;
+
+    SDL_Texture* tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, bmp.info_header.width, bmp.info_header.height);
+
+    int pitch;
+    void* data;
+    SDL_LockTexture(tex, NULL, &data, &pitch);
+    Uint32* pixels = (Uint32*)data;
     int size = bmp.info_header.width * bmp.info_header.height;
     for (int i = 0; i < size; i++) {
-
+        Uint32 c = 0xFF000000;
+        Uint8* p = bmp.pixels + (i * 3);
+        c = 0xFF000000 | (p[0] << 16) |
+            (p[1] << 8) | p[2];
+        pixels[i] = c;
     }
-    save_bitmap("vai.bmp", &bmp);
+    SDL_UnlockTexture(tex);
+
+    while (event.type != SDL_QUIT) {
+        while (SDL_PollEvent(&event));
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderCopy(renderer, tex, NULL, NULL);
+        SDL_RenderPresent(renderer);
+    }
     free_bitmap(&bmp);
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 
     return 0;
 }
@@ -98,7 +132,7 @@ bitmap_t load_bitmap(FILE* fp) {
     fseek(fp, fh->offset, SEEK_SET);
 
     /**
-     * Os pixels são guardados como se o eixo Y estivesse invertido, então é necessário ler linha por linha, porém de baixo para cima
+     * Os pixels guardados como se o eixo Y estivesse invertido, então é necessário ler linha por linha, porém de baixo para cima
     */
     for (int y = 0; y < ih->height; y++) fread(bmp.pixels + ((ih->height-1-y)*pitch), 1, pitch, fp);
     return bmp;

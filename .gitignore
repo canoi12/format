@@ -1,1 +1,5 @@
 *.bin
+bitmap/show
+bitmap/bitmap
+wav/wav
+wav/play
