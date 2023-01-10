@@ -5,7 +5,7 @@ Tar é um formato de empacotamento, dependendo do caso, pode não ser um dos mai
 O formato é lido em blocos de 512 bytes, então toda a estrutura funciona em cima disso, inclusive o cabeçalho tem esse mesmo tamanho. Caso um arquivo não utilize todos os 512 bytes do bloco, então é preenchido com zero, e caso ultrapasse os 512 bytes, um novo bloco vai ser alocado.
 
 A estrutura é mais ou menos assim:
-
+|                 |           |
 |-----------------|-----------|
 |   cabeçalho     | 512 bytes |
 |   conteúdo      | 512 bytes |
