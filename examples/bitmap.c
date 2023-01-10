@@ -2,7 +2,7 @@
 #include <SDL2/SDL.h>
 
 #define BITMAP_IMPLEMENTATION
-#include "../bitmap.h"
+#include "bitmap.h"
 
 static int create_texture4(SDL_Texture* tex, bitmap_t* bmp);
 static int create_texture8(SDL_Texture* tex, bitmap_t* bmp);
@@ -104,6 +104,9 @@ g 0x0000011111100000
 b 0x0000000000011111
 ------- masks -------
 0xf800  0x7e0  0x1f
+*/
+/* Não testei pra saber se funciona de fato,
+ * necessitando de uma imagem bmp de 16 bits pra fazer testes
 */
 int create_texture16(SDL_Texture* tex, bitmap_t* bmp) {
     if (!tex || !bmp) return -1;

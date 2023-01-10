@@ -63,9 +63,9 @@ struct tar_header_t {
 
 struct tar_t {
     tar_header_t header;
-    int size;
+    int offset, size;
     void* ptr;
-}
+};
 
 TAR_API int tar_load_file(const char* filename, tar_t* out);
 TAR_API int tar_write_file(const char* filename, tar_t* tar);
@@ -76,5 +76,9 @@ TAR_API void tar_free(tar_t* tar);
 #endif /* _TAR_H_ */
 
 #if defined(TAR_IMPLEMENTATION)
+
+int tar_load_file(const char* filename, tar_t* out) {
+    if (!filename || !out) return -1;
+}
 
 #endif /* TAR_IMPLEMENTATION */

@@ -3,22 +3,18 @@ CFLAGS = -Wall -std=c99 -g
 LFLAGS = -lSDL2
 
 LIBS = bitmap tar wav
+OUT = $(LIBS:%=%.bin)
 
-.PHONY: all buld
+.PHONY: all
+.SECONDARY: $(LIBS)
 
 build:
 	@echo "Testando"
 
-all: $(LIBS)
+all: $(OUT)
 
-bitmap: examples/bitmap.c bitmap.h
-	$(CC) $< -o $@ $(CFLAGS) $(LFLAGS)
-
-wav: examples/wav.c wav.h
-	$(CC) $< -o $@ $(CFLAGS) $(LFLAGS)
-
-tar: examples/tar.c tar.h
-	$(CC) $< -o $@ $(CFLAGS) $(LFLAGS)
+bitmap.bin: examples/bitmap.c bitmap/bitmap.h
+	$(CC) $< -o $@ $(CFLAGS) $(LFLAGS) -Ibitmap
 
 clean:
-	rm -f $(LIBS)
+	rm -f $(OUT)
