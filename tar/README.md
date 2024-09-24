@@ -1,8 +1,12 @@
 # tar (.tar)
 
-Tar é um formato de empacotamento, dependendo do caso, pode não ser um dos mais adequados de se utilizar, como não tem nenhum formato de compressão e também devido a como funciona sua estrutura, ele vai acabar sendo maior que um .zip por exemplo, em compensação é um formato extremamente fácil de se ler.
+Tar é um formato de empacotamento de dados. Dependendo do caso, pode não ser um dos mais adequados de se utilizar, pois apesar de ser um formato muito fácil de ler, não tem compressão (apesar de ser possível, mas não vou abordar isso aqui), e soma isso com como funciona a própria estrutura do formato, de separar todo o arquivo em blocos de 512 bytes. Vamos por partes.
 
-O formato é lido em blocos de 512 bytes, então toda a estrutura funciona em cima disso, inclusive o cabeçalho tem esse mesmo tamanho. Caso um arquivo não utilize todos os 512 bytes do bloco, então é preenchido com zero, e caso ultrapasse os 512 bytes, um novo bloco vai ser alocado.
+Como falei, o formato é lido em blocos de 512 bytes, então toda a estrutura funciona em cima disso, inclusive o cabeçalho tem esse mesmo tamanho. Caso um arquivo não utilize todos os 512 bytes do bloco, então é preenchido com zero, e caso ultrapasse os 512 bytes, um novo bloco vai ser alocado. Então rola um certo desperdício de espaço, por isso como falei, é bom avaliar se vai ser útil pro seu projeto.
+
+A grande vantagem é que é extremamente simples de implementar, então você pode modificar sua estrutura para ser mais eficiente pro seu projeto, eliminando esse desperdício de espaço, por exemplo. Removendo dados do cabeçalho que não serão úteis, aplicando algum sistema de compressão, enfim, o céu é o limite.
+
+No código eu implemento a estrutura padrão do Tar, fazendo direitinho nós conseguimos facilmente ver ele funcionando com programas de gerenciamento de pacotes, como o 7zip e o WinRar.
 
 A estrutura é mais ou menos assim:
 |                 |           |
@@ -14,7 +18,7 @@ A estrutura é mais ou menos assim:
 |   conteúdo      | 512 bytes |
 |     ...         |    ...    |
 
-Fora isso, ainda são adicionados mais dois blocos de 512 bytes vazios (ou seja, preenchidos com 0x0) ao final do arquivo.
+E no final do arquivo ainda são adicionados mais dois blocos de 512 bytes vazios (ou seja, preenchidos com 0x0).
 
 O cabeçalho segue o padrão posix, alguns dos valores guardados nele são uma strings que representam um valor em octal, então pra utilizar é necessário converter essas strings pra de fato um número octal e aí sim converter para decimal:
 
